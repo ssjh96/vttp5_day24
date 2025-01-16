@@ -25,7 +25,7 @@ public class BankAccountService
     }
 
     // Withdrawals etc
-    public void transfer(int transfererAccId, int transfereeAccId, float transferAmt)
+    public Boolean transfer(int transfererAccId, int transfereeAccId, float transferAmt)
     {
         // retrieve both accs 
         BankAccount accFrom = bankAccountRepo.getAccountById(transfererAccId);
@@ -42,8 +42,18 @@ public class BankAccountService
         if (isAccFromActive && isAccToActive && isTransfererBalanceSufficient)
         {
             // must be perform in transacation
-            //
+            // perform withdrawal from transferer
+            accFrom.setBalance(accFrom.getBalance() - transferAmt);
+            bankAccountRepo.updateAccountByIdBankAccount(accFrom);
+
+            // perform deposit to transferee
+            accTo.setBalance(accTo.getBalance() + transferAmt);
+            bankAccountRepo.updateAccountByIdBankAccount(accTo);
+
+            return true;
         }
+
+        return false;
     }
     
     private Boolean checkAccountActive(BankAccount bankAccount)
